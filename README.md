@@ -347,8 +347,8 @@ python -m Elevenyts
 
 | Platform | Link |
 |:---:|:---:|
-| 📢 Updates Channel | [t.me/Artistbots](https://t.me/Artistbots) |
-| 💬 Support Group | [t.me/elevenytsmusic](https://t.me/elevenytsmusic) |
+| 📢 Updates Channel | [t.me/Artistbots](https://t.me/Botchannel_10) |
+| 💬 Support Group | [t.me/elevenytsmusic](https://t.me/Auracharactergroup) |
 
 </div>
 
