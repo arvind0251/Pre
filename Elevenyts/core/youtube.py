@@ -182,12 +182,20 @@ class YouTube:
 
     async def download_via_api(self, link: str, video: bool = False) -> Optional[str]:
         """
-        Download audio/video using ArtistBots API (Primary Method).
-        
+        Download audio/video using BabyAPI (Primary Method).
+
+        BabyAPI works in two steps:
+          1. GET {api_url}/api/{song|video}?query={video_id}&download=true&api={key}
+             -> returns JSON with a "stream" field (a direct-download URL).
+          2. GET that stream URL to actually pull the bytes. The stream may
+             take a moment to become ready server-side, so we poll it with a
+             ranged GET first (some CDNs return 204 once ready instead of
+             200/206, so all three are treated as "ready").
+
         Args:
             link: YouTube URL or video ID
             video: True for video download, False for audio download
-        
+
         Returns:
             Path to downloaded file or None if failed
         """
@@ -196,7 +204,7 @@ class YouTube:
             return None
 
         if not self.api_url:
-            logger.debug("ARTISTBOTS_API_URL not configured")
+            logger.debug("BASE_URL not configured")
             return None
 
         # Extract video ID from URL
@@ -211,96 +219,107 @@ class YouTube:
             logger.debug(f"Invalid video ID: {video_id}")
             return None
 
+        if not self.artistbots_key:
+            logger.warning("No BabyAPI API key configured!")
+            return None
+
         DOWNLOAD_DIR = "downloads"
         os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-        
-        # Set file extension based on type
+
         file_ext = ".mp4" if video else ".mp3"
         file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}{file_ext}")
 
-        # Check if already downloaded
         if os.path.exists(file_path):
             logger.debug(f"File already exists: {file_path}")
             return file_path
 
         try:
-            download_type = "video" if video else "audio"
-            logger.info(f"🚀 [API PRIMARY] Trying ArtistBots API for {video_id} (type: {download_type})")
-            
-            # Prepare API parameters
-            params = {
-                "url": video_id,
-                "type": download_type,
-            }
-            
-            # Add API key if available
-            if self.artistbots_key:
-                params["api_key"] = self.artistbots_key
-                logger.debug(f"Using API key: {self.artistbots_key[:8]}...")
-            else:
-                logger.warning("No ArtistBots API key configured!")
-                return None
-            
+            kind = "video" if video else "song"
+            logger.info(f"🚀 [API PRIMARY] Trying BabyAPI for {video_id} (type: {kind})")
+
             async with aiohttp.ClientSession() as session:
-                api_endpoint = f"{self.api_url.rstrip('/')}/download"
-                logger.debug(f"Calling API: {api_endpoint}")
-                
+                # Step 1: ask BabyAPI to prepare the stream, get the URL back
+                request_endpoint = f"{self.api_url.rstrip('/')}/api/{kind}"
+                params = {"query": video_id, "download": "true", "api": self.artistbots_key}
+
                 async with session.get(
-                    api_endpoint,
+                    request_endpoint,
                     params=params,
-                    timeout=aiohttp.ClientTimeout(total=self.api_stream_timeout),
+                    timeout=aiohttp.ClientTimeout(total=self.api_timeout),
                 ) as response:
-                    logger.debug(f"API response status: {response.status}")
-                    
                     if response.status != 200:
                         try:
                             error_text = await response.text()
-                            logger.error(f"API returned status {response.status}: {error_text[:200]}")
-                        except:
-                            logger.error(f"API returned status {response.status}")
+                            logger.error(f"BabyAPI returned status {response.status}: {error_text[:200]}")
+                        except Exception:
+                            logger.error(f"BabyAPI returned status {response.status}")
                         return None
-                    
-                    # Handle direct binary download
-                    logger.info(f"📥 Downloading {download_type} via API for {video_id}...")
-                    
-                    # Get total file size if available
-                    content_length = response.headers.get('content-length')
+
+                    data = await response.json()
+                    stream_url = data.get("stream") or data.get("url") or data.get("stream_url")
+                    if not stream_url:
+                        logger.error(f"BabyAPI response missing stream URL: {data}")
+                        return None
+
+                # Step 2: poll until the stream is ready (some CDNs 204 when ready)
+                ready = False
+                start = time.time()
+                while time.time() - start < 90:
+                    try:
+                        async with session.get(
+                            stream_url,
+                            headers={"Range": "bytes=0-1"},
+                            timeout=aiohttp.ClientTimeout(total=15),
+                        ) as probe:
+                            if probe.status in (200, 206, 204):
+                                ready = True
+                                break
+                    except Exception:
+                        pass
+                    await asyncio.sleep(3)
+
+                if not ready:
+                    logger.error(f"BabyAPI stream did not become ready in time for {video_id}")
+                    return None
+
+                # Step 3: actually download it
+                logger.info(f"📥 Downloading {kind} via BabyAPI for {video_id}...")
+                async with session.get(
+                    stream_url,
+                    timeout=aiohttp.ClientTimeout(total=self.api_stream_timeout),
+                ) as dl:
+                    if dl.status not in (200, 206):
+                        logger.error(f"BabyAPI stream download returned status {dl.status}")
+                        return None
+
+                    content_length = dl.headers.get('content-length')
                     if content_length:
                         file_size_mb = int(content_length) / (1024 * 1024)
                         logger.info(f"📦 File size: {file_size_mb:.2f} MB")
-                    
-                    # Download file with progress
+
                     downloaded = 0
                     last_log = 0
                     with open(file_path, "wb") as f:
-                        async for chunk in response.content.iter_chunked(65536):  # 64KB chunks
+                        async for chunk in dl.content.iter_chunked(65536):
                             f.write(chunk)
                             downloaded += len(chunk)
-                            
-                            # Log progress every 5MB
                             if downloaded - last_log >= 5 * 1024 * 1024:
                                 progress_mb = downloaded / (1024 * 1024)
-                                if content_length:
-                                    total_mb = int(content_length) / (1024 * 1024)
-                                    percent = (downloaded / int(content_length)) * 100
-                                    logger.info(f"📊 Progress: {progress_mb:.1f}/{total_mb:.1f} MB ({percent:.1f}%)")
-                                else:
-                                    logger.info(f"📊 Downloaded: {progress_mb:.1f} MB")
+                                logger.info(f"📊 Downloaded: {progress_mb:.1f} MB")
                                 last_log = downloaded
-                    
-                    # Verify file was created and has content
+
                     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
                         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
                         logger.info(f"✅ [API SUCCESS] Downloaded: {file_path} ({file_size_mb:.2f} MB)")
                         return file_path
                     else:
-                        logger.error(f"❌ API download failed: file is empty or not created")
+                        logger.error(f"❌ BabyAPI download failed: file is empty or not created")
                         if os.path.exists(file_path):
                             os.remove(file_path)
                         return None
 
         except asyncio.TimeoutError:
-            logger.error(f"⏰ API timeout for {video_id} after {self.api_stream_timeout} seconds")
+            logger.error(f"⏰ API timeout for {video_id}")
             return None
         except aiohttp.ClientError as e:
             logger.error(f"🌐 API client error for {video_id}: {e}")
