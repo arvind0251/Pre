@@ -196,13 +196,19 @@ class Inline:
             [
                 self.ikb(text="  " + lang["help"],  callback_data="help",                                    style=ButtonStyle.SUCCESS),
                 self.ikb(text="  ʟᴀɴɢꜱ",           callback_data="help_langs",                              style=ButtonStyle.PRIMARY),
-                self.ikb(text="  ꜱᴏᴜʀᴄᴇ",          url="https://github.com/elevenyts",          style=ButtonStyle.DANGER),
-            ],
-            [
-                self.ikb(text="  " + lang["support"], url=config.SUPPORT_CHAT,    style=ButtonStyle.PRIMARY),
-                self.ikb(text=" " + lang["channel"], url=config.SUPPORT_CHANNEL, style=ButtonStyle.PRIMARY),
+                self.ikb(text="  ꜱᴏᴜʀᴄᴇ",          url="https://github.com/arvind0251/Pre",          style=ButtonStyle.DANGER),
             ],
         ]
+
+        support_row = [
+            b for b in [
+                self.ikb(text="  " + lang["support"], url=config.SUPPORT_CHAT,    style=ButtonStyle.PRIMARY) if config.SUPPORT_CHAT else None,
+                self.ikb(text=" " + lang["channel"], url=config.SUPPORT_CHANNEL, style=ButtonStyle.PRIMARY) if config.SUPPORT_CHANNEL else None,
+            ] if b
+        ]
+        if support_row:
+            rows.append(support_row)
+
         return self.ikm(rows)
 
     def yt_key(self, link: str) -> types.InlineKeyboardMarkup:
