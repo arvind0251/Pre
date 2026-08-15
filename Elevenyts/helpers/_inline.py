@@ -181,7 +181,7 @@ class Inline:
             [
                 self.ikb(text="  " + lang["help"],  callback_data="help",                                    style=ButtonStyle.SUCCESS),
                 self.ikb(text="  ʟᴀɴɢꜱ",           callback_data="help_langs",                              style=ButtonStyle.PRIMARY),
-                self.ikb(text="  ꜱᴏᴜʀᴄᴇ",          url="https://github.com/arvind0251/Pre",          style=ButtonStyle.DANGER),
+                self.ikb(text="  ꜱᴏᴜʀᴄᴇ",          url="https://t.me/RUD_RA_65",          style=ButtonStyle.DANGER),
             ],
         ]
 
