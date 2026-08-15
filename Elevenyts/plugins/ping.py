@@ -28,14 +28,25 @@ async def _ping(_, m: types.Message):
     ram_usage = f"{round(mem.used / (1024 ** 3), 1)}GB / {round(mem.total / (1024 ** 3), 1)}GB"
     cpu_percent = psutil.cpu_percent(interval=0.5)
     
-    # Get active chats count
-    from Elevenyts import db
-    active_chats = len(await db.get_chats())
+    # Get active chats count with error handling
+    try:
+        from Elevenyts import db
+        active_chats = len(await db.get_chats())
+    except Exception as e:
+        print(f"DB Error: {e}")
+        active_chats = "N/A"
+    
+    # Get tune ping with fallback
+    try:
+        tune_ping = await tune.ping()
+    except Exception as e:
+        print(f"Tune ping error: {e}")
+        tune_ping = "N/A"
     
     caption_text = m.lang["ping_pong"].format(
         latency,
         uptime,
-        await tune.ping(),
+        tune_ping,
         ram_usage,
         cpu_percent,
         active_chats,
@@ -50,9 +61,13 @@ async def _ping(_, m: types.Message):
             ),
             reply_markup=buttons.ping_markup(m.lang["support"]),
         )
-    except Exception:
+    except Exception as e:
+        print(f"Media error: {e}")
         # Fallback to text if media fails
-        await sent.edit_text(
-            text=caption_text,
-            reply_markup=buttons.ping_markup(m.lang["support"]),
-        )
+        try:
+            await sent.edit_text(
+                text=caption_text,
+                reply_markup=buttons.ping_markup(m.lang["support"]),
+            )
+        except Exception as e:
+            print(f"Text edit error: {e}")
