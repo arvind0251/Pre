@@ -42,6 +42,7 @@ class Storage:
             "logger": False,
             "cplay": {},             # str(chat_id) -> channel_id
             "autoleave": {},         # str(chat_id) -> bool
+            "autoplay": {},          # str(chat_id) -> bool
             "loop": {},              # str(chat_id) -> mode int
             "play_mode": [],
             "force_mode": [],
@@ -54,6 +55,7 @@ class Storage:
         self.admin_list = {}
         self.admin_cache_time = {}
         self.active_calls = {}
+        self.notified = []  # in-memory only, not persisted (matches old behavior)
 
         self._backup_msg_id: int | None = None
         self._autosave_task: asyncio.Task | None = None
@@ -180,6 +182,11 @@ class Storage:
         return self.admin_list[chat_id]
 
     # AUTH METHODS
+    async def _get_auth(self, chat_id: int) -> set[int]:
+        """Returns the set of authorized user IDs for a chat (also used
+        directly by the /authlist plugin, not just internally)."""
+        return set(self.data["auth"].get(str(chat_id), []))
+
     async def is_auth(self, chat_id: int, user_id: int) -> bool:
         return user_id in self.data["auth"].get(str(chat_id), [])
 
@@ -256,6 +263,11 @@ class Storage:
 
     async def get_blacklisted(self, chat: bool = False) -> list[int]:
         return self.data["blacklist_chats"] if chat else self.data["blacklist_users"]
+
+    @property
+    def blacklisted(self) -> list[int]:
+        """Direct-access alias some plugins use instead of get_blacklisted(chat=True)."""
+        return self.data["blacklist_chats"]
 
     # CHAT METHODS
     async def is_chat(self, chat_id: int) -> bool:
@@ -352,6 +364,14 @@ class Storage:
 
     async def set_autoleave(self, chat_id: int, enabled: bool) -> None:
         self.data["autoleave"][str(chat_id)] = enabled
+        self._mark_dirty()
+
+    # AUTOPLAY METHODS
+    async def get_autoplay(self, chat_id: int) -> bool:
+        return self.data["autoplay"].get(str(chat_id), False)
+
+    async def set_autoplay(self, chat_id: int, enabled: bool) -> None:
+        self.data["autoplay"][str(chat_id)] = enabled
         self._mark_dirty()
 
     # LOOP MODE METHODS
