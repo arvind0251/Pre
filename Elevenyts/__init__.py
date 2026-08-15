@@ -18,7 +18,6 @@ logging.basicConfig(
 # Reduce noise from third-party libraries
 logging.getLogger("httpx").setLevel(logging.ERROR)
 logging.getLogger("ntgcalls").setLevel(logging.CRITICAL)
-logging.getLogger("pymongo").setLevel(logging.ERROR)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("pytgcalls").setLevel(logging.ERROR)
 
@@ -50,8 +49,8 @@ from Elevenyts.core.userbot import Userbot
 userbot = Userbot()
 
 # Initialize database connection
-from Elevenyts.core.mongo import MongoDB
-db = MongoDB()
+from Elevenyts.core.storage import Storage
+db = Storage()
 
 # Initialize language system
 from Elevenyts.core.lang import Language

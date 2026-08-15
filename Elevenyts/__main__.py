@@ -62,11 +62,11 @@ async def main():
         http_thread.start()
         logger.info("🌐 HTTP server thread started for Render health checks")
 
-        # Step 3: Connect to MongoDB database
-        await db.connect()
-        
-        # Step 4: Start the main bot client
+        # Step 3: Start the main bot client
         await app.boot()
+
+        # Step 4: Connect to storage (loads/saves data via a Telegram group)
+        await db.connect()
         
         # Step 5: Start assistant/userbot clients (for joining voice chats)
         await userbot.boot()

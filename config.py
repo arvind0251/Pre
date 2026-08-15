@@ -14,8 +14,8 @@ class Config:
         self.LOGGER_ID: int = int(getenv("LOGGER_ID", "0"))
         self.OWNER_ID: int = int(getenv("OWNER_ID", "0"))
 
-        # Database
-        self.MONGO_URL: str = getenv("MONGO_DB_URI", "")
+        # Storage (Telegram group instead of MongoDB)
+        self.STORAGE_CHAT_ID: int = int(getenv("STORAGE_CHAT_ID", "0"))
 
         # Limits
         self.DURATION_LIMIT: int = int(getenv("DURATION_LIMIT", "300")) * 60
@@ -99,7 +99,7 @@ class Config:
             "API_ID": self.API_ID,
             "API_HASH": self.API_HASH,
             "BOT_TOKEN": self.BOT_TOKEN,
-            "MONGO_DB_URI": self.MONGO_URL,
+            "STORAGE_CHAT_ID": self.STORAGE_CHAT_ID,
             "LOGGER_ID": self.LOGGER_ID,
             "OWNER_ID": self.OWNER_ID,
             "STRING_SESSION": self.SESSION1,

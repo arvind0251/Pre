@@ -16,7 +16,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117)](https://python.org)
 [![Pyrogram](https://img.shields.io/badge/Pyrogram-Latest-A960FF?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117)](https://pyrogram.org)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white&labelColor=0D1117)](https://mongodb.com)
+[![Storage](https://img.shields.io/badge/Storage-Telegram_Group-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117)](https://telegram.org)
 [![PyTgCalls](https://img.shields.io/badge/PyTgCalls-Voice_Chat-7C3AED?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117)](https://pytgcalls.github.io)
 
 </div>
@@ -36,7 +36,7 @@
 ## 〔 ✦ 〕 Overview
 
 > A next-generation Telegram Voice Chat Music Bot engineered for performance, stability, and scale.
-> Built on **Pyrogram** · **PyTgCalls** · **MongoDB** — delivering crystal-clear audio with powerful admin tooling and multi-language support across global communities.
+> Built on **Pyrogram** · **PyTgCalls** · **Telegram-based storage** — delivering crystal-clear audio with powerful admin tooling and multi-language support across global communities.
 
 <br>
 
@@ -103,7 +103,7 @@
 ✦ Live Logs Monitor
 ✦ Error Reporting
 ✦ Auto Restart Support
-✦ MongoDB Integration
+✦ Telegram-Group Storage
 ✦ Multi-Language Support
 ```
 
@@ -131,7 +131,7 @@
 | `API_HASH` | ✅ | Telegram API Hash — [my.telegram.org](https://my.telegram.org) |
 | `BOT_TOKEN` | ✅ | Bot Token — [@BotFather](https://t.me/BotFather) |
 | `STRING_SESSION` | ✅ | Pyrogram String Session for assistant |
-| `MONGO_DB_URI` | ✅ | MongoDB connection string |
+| `STORAGE_CHAT_ID` | ✅ | Private group ID for data storage (bot must be admin) |
 | `LOGGER_ID` | ✅ | Telegram group ID for logs |
 | `OWNER_ID` | ✅ | Your Telegram user ID |
 | `BASE_URL` | ⚙️ | Music API endpoint (defaults to BabyAPI) |
@@ -306,7 +306,7 @@ python -m Elevenyts
 ║  ✦  KEEP THESE PRIVATE — NEVER SHARE PUBLICLY  ✦   ║
 ╠══════════════════════════════════════════════════════╣
 ║  ✗  BOT_TOKEN          ✗  STRING_SESSION            ║
-║  ✗  MONGO_DB_URI       ✗  API_HASH                  ║
+║  ✗  STORAGE_CHAT_ID    ✗  API_HASH                  ║
 ║  ✓  Use separate Telegram account for assistant     ║
 ║  ✓  Keep logger group private                       ║
 ║  ✓  Bot must be admin in group & logger group       ║
@@ -323,7 +323,7 @@ python -m Elevenyts
 
 Built on the shoulders of giants:
 
-`Pyrogram` · `PyTgCalls` · `MongoDB` · `Telegram Bot API`
+`Pyrogram` · `PyTgCalls` · `Telegram Bot API`
 
 <br>
 
