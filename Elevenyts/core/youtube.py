@@ -1,18 +1,3 @@
-# ==========================================================
-# Copyright (c) 2026 ArtistBots
-# All Rights Reserved.
-#
-# Project      : ArtistBots API Telegram Music Bot
-# Powered By   : Artist
-# Type         : API Based Telegram Music Bot
-#
-# Bot          : @ArtistApibot
-# Channel      : https://t.me/artistbots
-# GitHub       : https://github.com/elevenyts
-#
-# Unauthorized copying, modification, or redistribution
-# of this source code without permission is prohibited.
-# ==========================================================
 
 import os
 import re
@@ -41,8 +26,8 @@ class YouTube:
         self.warned = False
 
         # Get API configuration from config
-        self.api_url = config.ARTISTBOTS_API_URL
-        self.artistbots_key = config.ARTISTBOTS_KEY
+        self.api_url = config.MUSIC_API_URL
+        self.music_api_key = config.MUSIC_API_KEY
         self.enable_api = config.ENABLE_API
         self.enable_cookies_fallback = config.ENABLE_COOKIES_FALLBACK
         self.api_timeout = config.API_TIMEOUT
@@ -66,8 +51,8 @@ class YouTube:
         logger.info(f"🎵 API Priority: {'ENABLED' if self.enable_api else 'DISABLED'}")
         if self.enable_api:
             logger.info(f"🔗 API URL: {self.api_url}")
-            if self.artistbots_key:
-                masked_key = self.artistbots_key[:8] + "..." if len(self.artistbots_key) > 8 else "***"
+            if self.music_api_key:
+                masked_key = self.music_api_key[:8] + "..." if len(self.music_api_key) > 8 else "***"
                 logger.info(f"🔑 API Key: {masked_key}")
             else:
                 logger.warning("⚠️ No API Key configured!")
@@ -219,7 +204,7 @@ class YouTube:
             logger.debug(f"Invalid video ID: {video_id}")
             return None
 
-        if not self.artistbots_key:
+        if not self.music_api_key:
             logger.warning("No BabyAPI API key configured!")
             return None
 
@@ -240,7 +225,7 @@ class YouTube:
             async with aiohttp.ClientSession() as session:
                 # Step 1: ask BabyAPI to prepare the stream, get the URL back
                 request_endpoint = f"{self.api_url.rstrip('/')}/api/{kind}"
-                params = {"query": video_id, "download": "true", "api": self.artistbots_key}
+                params = {"query": video_id, "download": "true", "api": self.music_api_key}
 
                 async with session.get(
                     request_endpoint,
@@ -678,7 +663,7 @@ class YouTube:
         result = None
         
         # Try API first (Primary)
-        if self.enable_api and self.api_url and self.artistbots_key:
+        if self.enable_api and self.api_url and self.music_api_key:
             logger.info(f"🎯 [PRIORITY 1] Trying API download for {video_id}")
             result = await self.download_via_api(self.base + video_id, video=video)
             

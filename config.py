@@ -1,18 +1,3 @@
-# ==========================================================
-# Copyright (c) 2026 ArtistBots
-# All Rights Reserved.
-#
-# Project      : ArtistBots API Telegram Music Bot
-# Powered By   : Artist 
-# Type         : API Based Telegram Music Bot
-#
-# Bot          : @ArtistApibot
-# Channel      : https://t.me/artistbots
-# GitHub       : https://github.com/elevenyts
-#
-# Unauthorized copying, modification, or redistribution
-# of this source code without permission is prohibited.
-# ==========================================================
 from os import getenv
 from typing import List
 from dotenv import load_dotenv
@@ -56,9 +41,9 @@ class Config:
         self.VIDEO_PLAY: bool = self._str_to_bool(getenv("VIDEO_PLAY", "True"))
         self.VIDEO_MAX_HEIGHT: int = self._parse_video_height()
 
-        # ArtistBots API @ArtistApibot
-        self.ARTISTBOTS_API_URL: str = getenv("BASE_URL", "https://api.babiesiq.tech")
-        self.ARTISTBOTS_KEY: str = getenv("API_KEY", "")
+        # Music API
+        self.MUSIC_API_URL: str = getenv("BASE_URL", "https://api.babiesiq.tech")
+        self.MUSIC_API_KEY: str = getenv("API_KEY", "")
         self.ENABLE_API: bool = self._str_to_bool(getenv("ENABLE_API", "True"))
         self.ENABLE_COOKIES_FALLBACK: bool = self._str_to_bool(getenv("ENABLE_COOKIES_FALLBACK", "True"))
         self.API_TIMEOUT: int = int(getenv("API_TIMEOUT", "60"))
@@ -123,8 +108,8 @@ class Config:
         if missing:
             raise SystemExit(f"Missing required env vars: {', '.join(missing)}")
         
-        if self.ENABLE_API and not self.ARTISTBOTS_KEY:
-            print("Warning: ENABLE_API is True but ARTISTBOTS_KEY is not set")
+        if self.ENABLE_API and not self.MUSIC_API_KEY:
+            print("Warning: ENABLE_API is True but MUSIC_API_KEY is not set")
 
 
 config = Config()

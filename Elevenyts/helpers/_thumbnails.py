@@ -1,18 +1,3 @@
-# ==========================================================
-# Copyright (c) 2026 ArtistBots
-# All Rights Reserved.
-#
-# Project      : ArtistBots API Telegram Music Bot
-# Powered By   : Artist
-# Type         : API Based Telegram Music Bot
-#
-# Bot          : @ArtistApibot
-# Channel      : https://t.me/artistbots
-# GitHub       : https://github.com/elevenyts
-#
-# Unauthorized copying, modification, or redistribution
-# of this source code without permission is prohibited.
-# ==========================================================
 import os
 import re
 import asyncio
@@ -350,7 +335,7 @@ class Thumbnail:
                     fill=(br, bg_, bb, 255)
                 )
 
-            clean_title = re.sub(r"\W+", " ", song.title).title() + "  ·  Artistbots"
+            clean_title = re.sub(r"\W+", " ", song.title).title()
             final_title = trim_to_width(clean_title, self.title_font, MAX_TITLE_WIDTH)
 
             # Title glow (very subtle violet)
